@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
+using System.Linq;
+
 
 public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -10,6 +12,9 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] private NetworkRunner _networkRunnerPrefab;
 
     private NetworkRunner _networkRunnerInstance;
+    
+    private List<SessionInfo> _cachedSessionList = new List<SessionInfo>();
+
 
     private void Awake()
     {
@@ -41,15 +46,44 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     private void Start()
     {
         
-        
-        // Start the NetworkRunner as a host
-        _networkRunnerInstance.StartGame(new StartGameArgs()
-        {
-            GameMode = GameMode.Shared,
-            SessionName = "MyFusionGame",
-            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
-        });
     }
+    
+    
+    public bool SessionExists(string sessionName)
+    {
+        if (string.IsNullOrEmpty(sessionName)) return false;
+
+        // Quick check using the runner's LobbyInfo if you're already in a lobby
+        if (_networkRunnerInstance != null)
+        {
+            var lobby = _networkRunnerInstance.LobbyInfo;
+            if (lobby.IsValid && string.Equals(lobby.Name, sessionName, StringComparison.Ordinal))
+                return true;
+        }
+
+        // Check the cached session list from OnSessionListUpdated
+        return _cachedSessionList.Any(s => string.Equals(s.Name, sessionName, StringComparison.Ordinal));
+    }
+
+// Replace the existing OnSessionListUpdated implementation with this:
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+    {
+        // Cache the list for later queries
+        _cachedSessionList = sessionList != null ? new List<SessionInfo>(sessionList) : new List<SessionInfo>();
+
+        // Optional: debug/log
+        Debug.Log($"Session list updated: {_cachedSessionList.Count} sessions cached.");
+    }
+
+// Example usage (can be called after you receive session list or in Start)
+    private void ExampleCheck(string name)
+    {
+        bool exists = SessionExists(name);
+        Debug.Log($"Session '{name}' exists: {exists}");
+    }
+    
+    
+    
 
 
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
@@ -121,11 +155,7 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         throw new NotImplementedException();
     }
-
-    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
-    {
-        throw new NotImplementedException();
-    }
+    
 
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data)
     {
