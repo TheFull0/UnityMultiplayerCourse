@@ -65,7 +65,7 @@ public class SessionButton : MonoBehaviour
             return;
         }
 
-        indexText.text = $"{SessionIndex.ToString()}.";
+        indexText.text = $"{SessionIndex+1}.";
         sessionNameText.text = _sessionInfo.Name;
         playerCountText.text = $"{_sessionInfo.PlayerCount}/{_sessionInfo.MaxPlayers}";
     }

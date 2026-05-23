@@ -11,6 +11,7 @@ namespace UI
         [SerializeField] private Button JoinLobbyButton;
         [SerializeField] private Button startSessionButton;
         [SerializeField] private Button quitButton;
+        
 
         private void Awake()
         {
@@ -48,4 +49,6 @@ namespace UI
             canvasGroup.blocksRaycasts = false;
         }
     }
+    
+    
 }

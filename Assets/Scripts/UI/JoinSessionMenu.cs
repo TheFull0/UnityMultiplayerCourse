@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DefaultNamespace;
 using Fusion;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class JoinSessionMenu : UIHandlerBase
@@ -11,15 +12,21 @@ public class JoinSessionMenu : UIHandlerBase
     [SerializeField] private Button _refreshButton;
     [SerializeField] private Button _backButton;
 
-    [SerializeField] private SessionButtonWrapper sessionButtonPrefab;
+    [FormerlySerializedAs("sessionButtonPrefab")] [SerializeField] private SessionButtonWrapper sessionButtonWrapper;
 
     private void Awake()
     {
         _startSessionButton.onClick.AddListener(OnStartSessionClicked);
         _joinSessionButton.onClick.AddListener(OnJoinSessionClicked);
+        _refreshButton.onClick.AddListener(OnRefreshClicked);
         _backButton.onClick.AddListener(OnBackClicked);
 
         NetworkEvents.OnSessionListReceived += OnSessionListReceived;
+    }
+
+    private void OnRefreshClicked()
+    {
+        
     }
 
     private void OnSessionListReceived(List<SessionInfo> sessionInfos)
@@ -42,13 +49,13 @@ public class JoinSessionMenu : UIHandlerBase
 
     private void UpdateButtonWrapper(List<SessionInfo> info)
     {
-        if (sessionButtonPrefab == null)
+        if (sessionButtonWrapper == null)
         {
             Debug.LogError("SessionButtonWrapper reference is missing in JoinSessionMenu.");
             return;
         }
         
-        sessionButtonPrefab.UpdateSessionButtons(info);
+        sessionButtonWrapper.UpdateSessionButtons(info);
     }
 
     private void OnStartSessionClicked()
@@ -58,7 +65,17 @@ public class JoinSessionMenu : UIHandlerBase
 
     private void OnJoinSessionClicked()
     {
-        NetworkEvents.RequestJoinSession("TEST");
+        var sessionInfo = sessionButtonWrapper.GetCurrentChosenSessionInfo();
+        if (sessionInfo == null)
+        {
+            Debug.LogWarning("No session selected to join.");
+            // Show error UI feedback here
+            return;
+        }
+        
+        Debug.Log($"Attempting to join session: {sessionInfo.Name}");
+        NetworkEvents.RequestJoinSession(sessionInfo.Name);
+        
     }
 
     private void OnBackClicked()

@@ -23,15 +23,15 @@ public class SessionButtonWrapper : MonoBehaviour
         {
             if (i < _sessionButtons.Count)
             {
-                _sessionButtons[i].SessionInfo = sessionInfos[i];
                 _sessionButtons[i].SessionIndex = i;
+                _sessionButtons[i].SessionInfo = sessionInfos[i];
             }
             else
             {
                 var newButton = Instantiate(_sessionButtonPrefab, sessionListParentContainer.transform);
                 newButton.Initialize(this);
-                newButton.SessionInfo = sessionInfos[i];
                 newButton.SessionIndex = i;
+                newButton.SessionInfo = sessionInfos[i];
                 _sessionButtons.Add(newButton);
             }
         }
@@ -65,13 +65,8 @@ public class SessionButtonWrapper : MonoBehaviour
         _currentSessionIndexChosen = sessionIndex;
     }
 
-    public SessionInfo GetCurrentSessionInfo()
+    public SessionInfo GetCurrentChosenSessionInfo()
     {
-        if (_currentSessionIndexChosen < 0 || _currentSessionIndexChosen >= _sessionButtons.Count)
-        {
-            Debug.LogWarning($"Current session index is out of bounds: {_currentSessionIndexChosen}");
-            return null;
-        }
         
         return _sessionButtons[_currentSessionIndexChosen].SessionInfo;
     }

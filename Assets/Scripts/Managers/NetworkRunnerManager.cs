@@ -14,6 +14,9 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _networkRunnerInstance;
     
     private List<SessionInfo> _cachedSessionList = new List<SessionInfo>();
+    
+    [SerializableType] private ReadyCheckHandler readyCheckHandlerPrefab;
+    private ReadyCheckHandler _readyCheckHandlerInstance;
 
 
     private void Awake()
@@ -86,7 +89,7 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
             GameMode = GameMode.Shared,
             SessionName = sessionName,
             PlayerCount = maxPlayerCount,
-            OnGameStarted = OnGameStarted
+            OnGameStarted = OnGameStarted,
         };
         _networkRunnerInstance.StartGame(startGameArgs);
     }
