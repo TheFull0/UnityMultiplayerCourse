@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using DefaultNamespace;
+using Fusion;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,10 +14,35 @@ public class SearchLobbyMenu : UIHandlerBase
     
     [SerializeField] private int maxLobbyNameLength = 4;
 
+    private bool isValidLobby;
+
     private void Awake()
     {
         searchLobbyButton.onClick.AddListener(OnSearchLobbyClicked);
         quitButton.onClick.AddListener(OnQuitClicked);
+        
+        NetworkEvents.OnSessionListReceived += SessionListReceived;
+        NetworkEvents.OnLobbyWasEmpty += OnLobbyWasEmpty;
+
+    }
+
+    private void OnLobbyWasEmpty()
+    {
+        searchLobbyButton.interactable = true;
+        Debug.LogWarning("Lobby has no sessions or does not exist.");
+        // Show error UI feedback here
+    }
+
+    private void SessionListReceived(List<SessionInfo> sessions)
+    {
+        Debug.Log($"Received {sessions.Count} sessions from the network.");
+        foreach (var session in sessions)
+        {
+            Debug.Log($"Session Name: {session.Name}, Players: {session.PlayerCount}/{session.MaxPlayers}");
+        }
+        
+        searchLobbyButton.interactable = true;
+        UIManager.Instance.SwapMenu(MenuType.JoinSessionMenu);
     }
 
     private void OnSearchLobbyClicked()
@@ -24,8 +51,8 @@ public class SearchLobbyMenu : UIHandlerBase
 
         if (ValidateLobbyName(lobbyName))
         {
-            // Proceed with lobby search logic using the valid lobby name
-            Debug.Log($"Searching for lobby with name: {lobbyName}");
+            Debug.Log($"Searching for lobby: {lobbyName}");
+            NetworkEvents.RequestJoinLobby(lobbyName);
         }
     }
 
@@ -71,5 +98,12 @@ public class SearchLobbyMenu : UIHandlerBase
         canvasGroup.alpha = 0;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
+    }
+    
+    
+    private void OnDestroy()
+    {
+        NetworkEvents.OnSessionListReceived -= SessionListReceived;
+        NetworkEvents.OnLobbyWasEmpty -= OnLobbyWasEmpty;
     }
 }

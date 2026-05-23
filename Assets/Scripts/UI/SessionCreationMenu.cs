@@ -39,6 +39,7 @@ namespace UI
             {
                 // Proceed with session creation logic using the valid lobby name, session name, and max players
                 Debug.Log($"Creating session with lobby name: {lobbyName}, session name: {sessionName}, max players: {maxPlayersInSession}");
+                NetworkEvents.RequestCreateSession(lobbyName, sessionName, maxPlayersInSession);
             }
         }
 
