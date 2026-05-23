@@ -773,6 +773,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Networking_Menu_Canvas_PF
       objectReference: {fileID: 0}
+    - target: {fileID: 4276251367338083501, guid: 9bd6db3afba88b34baa1f1fc2dafcb1d, type: 3}
+      propertyPath: m_ChildScaleHeight
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4636793514029324379, guid: 9bd6db3afba88b34baa1f1fc2dafcb1d, type: 3}
       propertyPath: m_Pivot.x
       value: 0
