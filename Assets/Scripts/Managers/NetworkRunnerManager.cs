@@ -15,10 +15,11 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     
     private List<SessionInfo> _cachedSessionList = new List<SessionInfo>();
     
-    [SerializableType] private ReadyCheckHandler readyCheckHandlerPrefab;
+    [SerializeField] private ReadyCheckHandler readyCheckHandlerPrefab;
     private ReadyCheckHandler _readyCheckHandlerInstance;
 
-
+    private const string SCENE_NAME = "GameScene";
+    
     private void Awake()
     {
         // Ensure only one instance of NetworkRunnerManager exists
@@ -45,9 +46,18 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
         
         _networkRunnerInstance.AddCallbacks(this);
         
-        NetworkEvents.OnCreateSessionRequested+= CreateSession;
-        NetworkEvents.OnJoinLobbyRequested+= JoinLobbySession;
+        NetworkEvents.OnCreateSessionRequested += CreateSession;
+        NetworkEvents.OnJoinLobbyRequested += JoinLobbySession;
         NetworkEvents.OnJoinSessionRequested += JoinSession;
+        NetworkEvents.OnStartGameRequested += StartMatch;
+    }
+
+    private void StartMatch()
+    {
+        if (_networkRunnerInstance.IsSharedModeMasterClient)
+        {
+            _networkRunnerInstance.LoadScene(SCENE_NAME);
+        }
     }
 
     private async void JoinLobbySession(string lobbyName)
@@ -78,8 +88,25 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     private void OnGameJoined(NetworkRunner obj)
     {
         Debug.Log("Joined Game Successfully!");
+        UIManager.Instance.SwapMenu(MenuType.InSessionMenu);
+
     }
 
+    public void SetReadyCheckHandler(ReadyCheckHandler handler)
+    {
+        _readyCheckHandlerInstance = handler;
+        Debug.Log("SetReadyCheckHandler");
+    }
+    
+    public int GetPlayerCountInCurrentSession()
+    {
+        int count = 0;
+        foreach (var activeP in _networkRunnerInstance.ActivePlayers)
+        {
+            count++;
+        }
+        return count;
+    }
 
     private void CreateSession(string lobbyName, string sessionName, int maxPlayerCount)
     {
@@ -94,9 +121,15 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
         _networkRunnerInstance.StartGame(startGameArgs);
     }
 
-    private void OnGameStarted(NetworkRunner obj)
+    private void OnGameStarted(NetworkRunner runner)
     {
         Debug.Log("Game Started Successfully!");
+        if (runner.IsSharedModeMasterClient)
+        {
+            _readyCheckHandlerInstance = runner.Spawn(readyCheckHandlerPrefab);
+            UIManager.Instance.SwapMenu(MenuType.InSessionMenu);
+
+        }
     }
 
 
@@ -121,6 +154,13 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
+        bool isLocalPlayer = false;
+        if (runner.LocalPlayer == player)
+        {
+            isLocalPlayer = true;
+            Debug.Log("Local Player Left the Game");
+        }
+        Debug.Log($"OnPlayerLeft called in NetworkRunnerManager. Player: {player.PlayerId} Left, IsLocalPlayer: {isLocalPlayer}");
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
@@ -193,5 +233,10 @@ public class NetworkRunnerManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadStart(NetworkRunner runner)
     {
+    }
+
+    public PlayerRef GetLocalPlayerRef()
+    {
+        return _networkRunnerInstance.LocalPlayer;
     }
 }

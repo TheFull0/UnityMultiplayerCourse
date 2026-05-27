@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using DefaultNamespace;
 using Fusion;
 using UnityEngine;
 using UnityEngine.Serialization;

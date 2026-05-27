@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using DefaultNamespace;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -94,5 +93,6 @@ public enum MenuType
     MainMenu,
     MakeSessionMenu,
     JoinSessionMenu,
-    JoinLobbyMenu
+    JoinLobbyMenu,
+    InSessionMenu
 }

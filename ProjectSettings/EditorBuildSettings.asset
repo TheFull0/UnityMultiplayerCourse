@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scene/HomeWorkScene.unity
     guid: 66dd21c258564304fac60209e7aef49b
   - enabled: 1
-    path: Assets/Scene/ReadyCheckScene.unity
+    path: Assets/Scene/GameScene.unity
     guid: 21fa8b2905176234b8588a4bdf0e91ac
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
